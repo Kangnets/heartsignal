@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>고급 카톡 썸 분석기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Mixpanel Snippet -->
+    <script>
+      (function (f, b) {
+        if (!b.__SV) {
+          var e, g, i, h;
+          window.mixpanel = b;
+          b._i = [];
+          b.init = function (e, f, c) {
+            function g(a, d) {
+              var b = d.split(".");
+              2 == b.length && ((a = a[b[0]]), (d = b[1]));
+              a[d] = function () {
+                a.push([d].concat(Array.prototype.slice.call(arguments, 0)));
+              };
+            }
+            var a = b;
+            "undefined" !== typeof c ? (a = b[c] = []) : (c = "mixpanel");
+            a.people = a.people || [];
+            a.toString = function (a) {
+              var d = "mixpanel";
+              "mixpanel" !== c && (d += "." + c);
+              a || (d += " (stub)");
+              return d;
+            };
+            a.people.toString = function () {
+              return a.toString(1) + ".people (stub)";
+            };
+            i =
+              "disable track track_pageview track_links track_forms track_with_groups add_group set_group remove_group delete_group get_group".split(
+                " "
+              );
+            for (h = 0; h < i.length; h++) g(a, i[h]);
+            b._i.push([e, f, c]);
+          };
+          b.__SV = 1.2;
+          e = f.createElement("script");
+          e.type = "text/javascript";
+          e.async = !0;
+          e.src =
+            "undefined" !== typeof MIXPANEL_CUSTOM_LIB_URL
+              ? MIXPANEL_CUSTOM_LIB_URL
+              : "https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";
+          g = f.getElementsByTagName("script")[0];
+          g.parentNode.insertBefore(e, g);
+        }
+      })(document, window.mixpanel || []);
+    </script>
+    <!-- End Mixpanel Snippet -->
+    <style>
+      body {
+        font-family: "Noto Sans KR", sans-serif;
+      }
+      .gauge-bar {
+        transition: width 1s ease-in-out;
+      }
+      .markdown-content h3 {
+        font-size: 1.25rem; /* text-xl */
+        font-weight: 700; /* font-bold */
+        margin-top: 1.5rem; /* mt-6 */
+        margin-bottom: 0.5rem; /* mb-2 */
+        border-bottom: 1px solid #e5e7eb; /* border-b */
+        padding-bottom: 0.5rem; /* pb-2 */
+      }
+      .markdown-content ul {
+        list-style-type: disc;
+        margin-left: 1.5rem; /* ml-6 */
+        margin-bottom: 1rem; /* mb-4 */
+      }
+      .markdown-content li {
+        margin-bottom: 0.5rem; /* mb-2 */
+      }
+      .markdown-content p {
+        margin-top: 0.5rem;
+        margin-bottom: 1rem; /* mb-4 */
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div
+      class="w-full max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8"
+    >
+      <!-- Header -->
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">고급 카톡 썸 분석기 💘</h1>
+        <p class="text-gray-500 mt-2">
+          AI가 당신의 관계를 다각도로 분석해 드립니다.
+        </p>
+      </div>
+
+      <!-- Name Inputs -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="person-a" class="block text-sm font-medium text-gray-700"
+            >분석 대상 1 (나)</label
+          >
+          <input
+            type="text"
+            id="person-a"
+            class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+            placeholder="대화 속 나의 이름"
+          />
+        </div>
+        <div>
+          <label for="person-b" class="block text-sm font-medium text-gray-700"
+            >분석 대상 2 (상대방)</label
+          >
+          <input
+            type="text"
+            id="person-b"
+            class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+            placeholder="대화 속 상대방 이름"
+          />
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="mb-4">
+        <label
+          for="chat-input"
+          class="block text-sm font-medium text-gray-700 mb-2"
+        >
+          아래에 대화 내용을 붙여넣거나, 파일을 업로드 해주세요.
+        </label>
+        <textarea
+          id="chat-input"
+          rows="10"
+          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition"
+          placeholder="[김썸남] 뭐해?&#10;[나] 그냥 있어 ㅎㅎ 넌?&#10;..."
+        ></textarea>
+        <label
+          for="file-upload"
+          class="mt-2 inline-block bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg cursor-pointer"
+        >
+          <span>📁 파일 업로드 (.txt, .csv)</span>
+          <input
+            id="file-upload"
+            type="file"
+            class="hidden"
+            accept=".txt,.csv"
+          />
+        </label>
+      </div>
+
+      <!-- Action Button -->
+      <button
+        id="analyze-btn"
+        class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
+      >
+        분석하기
+      </button>
+
+      <!-- Loading Indicator -->
+      <div id="loading" class="text-center my-8 hidden">
+        <svg
+          class="animate-spin h-8 w-8 text-pink-500 mx-auto"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        <p class="mt-2 text-gray-600">
+          AI가 대화 내용을 심층 분석하고 있어요...
+        </p>
+      </div>
+
+      <!-- Result Section -->
+      <div id="result-section" class="mt-8 hidden">
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">
+          AI 심층 분석 결과
+        </h2>
+
+        <!-- Scores -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <!-- Mutual Score -->
+          <div class="bg-pink-50 p-4 rounded-lg text-center">
+            <h3 class="text-lg font-bold text-pink-800">종합 호감도</h3>
+            <p class="text-5xl font-bold text-pink-500 my-2">
+              <span id="mutual-score">0</span><span class="text-2xl">%</span>
+            </p>
+            <div class="w-full bg-pink-200 rounded-full h-4">
+              <div
+                id="mutual-gauge"
+                class="bg-gradient-to-r from-pink-400 to-red-500 h-4 rounded-full gauge-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+          </div>
+          <!-- Individual Scores -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg font-bold text-gray-800 mb-3 text-center">
+              개별 호감도
+            </h3>
+            <div class="space-y-3">
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span id="a-to-b-label">A → B</span>
+                  <span class="font-semibold" id="a-to-b-score">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div
+                    id="a-to-b-gauge"
+                    class="bg-blue-500 h-2.5 rounded-full gauge-bar"
+                    style="width: 0%"
+                  ></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span id="b-to-a-label">B → A</span>
+                  <span class="font-semibold" id="b-to-a-score">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div
+                    id="b-to-a-gauge"
+                    class="bg-green-500 h-2.5 rounded-full gauge-bar"
+                    style="width: 0%"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Analysis Sections -->
+        <div class="space-y-6">
+          <div class="bg-gray-50 p-4 rounded-lg markdown-content">
+            <h3 class="text-xl font-bold text-gray-800 mb-3">
+              💡 AI의 관계 발전 피드백
+            </h3>
+            <div id="feedback-text" class="text-gray-700 leading-relaxed"></div>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg markdown-content">
+            <h3 class="text-xl font-bold text-gray-800 mb-3">
+              💬 추천 대화 주제
+            </h3>
+            <div id="topics-text" class="text-gray-700 leading-relaxed"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div
+        id="error-message"
+        class="hidden mt-4 text-center text-red-500 font-bold p-3 bg-red-100 rounded-lg"
+      ></div>
+
+      <!-- Disclaimer -->
+      <p class="text-xs text-gray-400 text-center mt-6">
+        ※ 본 분석은 AI의 의견으로, 재미로 참고해 주세요!
+      </p>
+    </div>
+
+    <script>
+      // Initialize Mixpanel
+      mixpanel.init("ce6e9e3dc50e5821306f936f938922c1", { debug: true });
+
+      const analyzeBtn = document.getElementById("analyze-btn");
+      const chatInput = document.getElementById("chat-input");
+      const fileUpload = document.getElementById("file-upload");
+      const personAInput = document.getElementById("person-a");
+      const personBInput = document.getElementById("person-b");
+
+      const loadingIndicator = document.getElementById("loading");
+      const resultSection = document.getElementById("result-section");
+      const errorDiv = document.getElementById("error-message");
+
+      // Result elements
+      const mutualScoreEl = document.getElementById("mutual-score");
+      const mutualGaugeEl = document.getElementById("mutual-gauge");
+      const aToBLabelEl = document.getElementById("a-to-b-label");
+      const aToBScoreEl = document.getElementById("a-to-b-score");
+      const aToBGaugeEl = document.getElementById("a-to-b-gauge");
+      const bToALabelEl = document.getElementById("b-to-a-label");
+      const bToAScoreEl = document.getElementById("b-to-a-score");
+      const bToAGaugeEl = document.getElementById("b-to-a-gauge");
+      const feedbackTextEl = document.getElementById("feedback-text");
+      const topicsTextEl = document.getElementById("topics-text");
+
+      analyzeBtn.addEventListener("click", handleAnalysis);
+      fileUpload.addEventListener("change", handleFileUpload);
+
+      function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) {
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          chatInput.value = e.target.result;
+        };
+        reader.readAsText(file);
+      }
+
+      async function handleAnalysis() {
+        const conversation = chatInput.value;
+        const personA = personAInput.value.trim();
+        const personB = personBInput.value.trim();
+
+        if (!personA || !personB) {
+          showError("분석 대상자 두 명의 이름을 모두 입력해 주세요.");
+          return;
+        }
+        if (!conversation.trim()) {
+          showError("분석할 대화 내용을 입력하거나 파일을 업로드해 주세요.");
+          return;
+        }
+
+        // --- MIXPANEL TRACKING ---
+        try {
+          mixpanel.track("Analyze Chat Attempt", {
+            person_a: personA,
+            person_b: personB,
+            chat_content_length: conversation.length, // Send length instead of full content for privacy and performance
+            distinct_id: mixpanel.get_distinct_id(),
+          });
+        } catch (e) {
+          console.error("Mixpanel tracking failed", e);
+        }
+        // --- END MIXPANEL TRACKING ---
+
+        // Reset UI
+        resultSection.classList.add("hidden");
+        errorDiv.classList.add("hidden");
+        loadingIndicator.classList.remove("hidden");
+
+        try {
+          const prompt = `
+                    You are a highly sophisticated relationship analysis AI. Your task is to analyze the provided Korean chat conversation between two people, "${personA}" and "${personB}".
+                    Based on the conversation, you must provide a detailed analysis.
+                    
+                    Your response MUST be a single, valid JSON object and nothing else. Do not include any text before or after the JSON object, and do not use markdown formatting like \`\`\`json.
+
+                    The JSON object must have the following structure:
+                    {
+                      "mutual_crush_score": <A number from 0 to 100 for the overall mutual interest>,
+                      "a_to_b_crush_score": <A number from 0 to 100 for how much "${personA}" likes "${personB}">,
+                      "b_to_a_crush_score": <A number from 0 to 100 for how much "${personB}" likes "${personA}">,
+                      "feedback": "<A detailed feedback for relationship improvement, in Korean, using Markdown format.>",
+                      "topic_suggestions": "<A list of recommended conversation topics to deepen the relationship, in Korean, using Markdown list format.>"
+                    }
+
+                    VERY IMPORTANT: All string values within the JSON must have double quotes properly escaped with a backslash (\\"). For example, if a string contains the text "some text", it must be represented as \\"some text\\" in the JSON output. This is critical for the JSON to be valid.
+
+                    Analyze factors like:
+                    - Tone, use of emojis, and affectionate language.
+                    - Depth and reciprocity of questions.
+                    - Initiation of conversation and plans.
+                    - Expressions of care, compliments, and personal sharing.
+
+                    Here is the conversation to analyze:
+                    ---
+                    ${conversation}
+                    ---
+                `;
+
+          let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+          const payload = {
+            contents: chatHistory,
+          };
+          const apiKey = "AIzaSyAc1HlNQxH7VNZMiCWdxD9eLj0ii_m6VPc"; // API key is handled by the environment
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            const errorBody = await response.text();
+            console.error("API Error Body:", errorBody);
+            throw new Error(`API call failed with status: ${response.status}`);
+          }
+
+          const result = await response.json();
+
+          if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+            const responseText = result.candidates[0].content.parts[0].text;
+
+            // Robust JSON parsing
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            if (jsonMatch && jsonMatch[0]) {
+              try {
+                const jsonString = jsonMatch[0];
+                const parsedData = JSON.parse(jsonString);
+                displayResults(parsedData, personA, personB);
+              } catch (jsonError) {
+                console.error("JSON Parse Error:", jsonError);
+                console.error("Invalid JSON string from AI:", responseText);
+                throw new Error(
+                  "AI가 유효하지 않은 형식의 데이터를 반환했습니다."
+                );
+              }
+            } else {
+              console.error(
+                "No JSON object found in AI response:",
+                responseText
+              );
+              throw new Error("AI 응답에서 유효한 데이터를 찾지 못했습니다.");
+            }
+          } else {
+            throw new Error("API 응답이 예상과 다른 구조입니다.");
+          }
+        } catch (error) {
+          console.error("Analysis Error:", error);
+          showError(
+            error.message ||
+              "분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
+          );
+        } finally {
+          loadingIndicator.classList.add("hidden");
+        }
+      }
+
+      function displayResults(data, personA, personB) {
+        // Check if all required data points exist
+        const requiredKeys = [
+          "mutual_crush_score",
+          "a_to_b_crush_score",
+          "b_to_a_crush_score",
+          "feedback",
+          "topic_suggestions",
+        ];
+        const missingKeys = requiredKeys.filter((key) => !(key in data));
+        if (missingKeys.length > 0) {
+          showError(
+            `AI 응답에 필수 데이터(${missingKeys.join(", ")})가 누락되었습니다.`
+          );
+          return;
+        }
+
+        const {
+          mutual_crush_score,
+          a_to_b_crush_score,
+          b_to_a_crush_score,
+          feedback,
+          topic_suggestions,
+        } = data;
+
+        // Update scores and gauges
+        mutualScoreEl.textContent = mutual_crush_score;
+        mutualGaugeEl.style.width = `${mutual_crush_score}%`;
+
+        aToBLabelEl.textContent = `${personA} → ${personB}`;
+        aToBScoreEl.textContent = `${a_to_b_crush_score}%`;
+        aToBGaugeEl.style.width = `${a_to_b_crush_score}%`;
+
+        bToALabelEl.textContent = `${personB} → ${personA}`;
+        bToAScoreEl.textContent = `${b_to_a_crush_score}%`;
+        bToAGaugeEl.style.width = `${b_to_a_crush_score}%`;
+
+        // Update text sections
+        feedbackTextEl.innerHTML = convertMarkdownToHTML(feedback);
+
+        // Handle topic_suggestions which might be an array or a string
+        const topicsMarkdown = Array.isArray(topic_suggestions)
+          ? topic_suggestions.join("\n")
+          : topic_suggestions;
+        topicsTextEl.innerHTML = convertMarkdownToHTML(topicsMarkdown);
+
+        // Show results
+        resultSection.classList.remove("hidden");
+        if (window.innerWidth < 768) {
+          resultSection.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+
+      function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.classList.remove("hidden");
+        loadingIndicator.classList.add("hidden");
+      }
+
+      function convertMarkdownToHTML(md) {
+        if (typeof md !== "string") {
+          console.error(
+            "convertMarkdownToHTML received a non-string value:",
+            md
+          );
+          return ""; // Return empty string if not a string
+        }
+        let text = md.trim();
+        text = text.replace(/^### (.*$)/gim, "<h3>$1</h3>");
+        text = text.replace(/\*\*(.*?)\*\*/gim, "<strong>$1</strong>");
+        const lines = text.split("\n");
+        let inList = false;
+        let finalHtml = "";
+        for (let i = 0; i < lines.length; i++) {
+          let line = lines[i].trim();
+          if (line.startsWith("- ") || line.startsWith("* ")) {
+            if (!inList) {
+              finalHtml += "<ul>";
+              inList = true;
+            }
+            finalHtml += `<li>${line.substring(2)}</li>`;
+          } else {
+            if (inList) {
+              finalHtml += "</ul>";
+              inList = false;
+            }
+            if (line) {
+              if (!line.startsWith("<h3>") && !line.startsWith("<ul>")) {
+                finalHtml += `<p>${line}</p>`;
+              } else {
+                finalHtml += line;
+              }
+            }
+          }
+        }
+        if (inList) finalHtml += "</ul>";
+        return finalHtml
+          .replace(/<\/p><ul>/g, "<ul>")
+          .replace(/<\/ul><p>/g, "</ul>");
+      }
+    </script>
+  </body>
+</html>
